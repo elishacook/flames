@@ -1,0 +1,11 @@
+[package]
+name = "flames"
+version = "0.1.0"
+authors = ["elisha <elisha@elishacook.com>"]
+
+
+
+[dependencies]
+nanovg = { version="*", features=["gl3"] }
+gl = "*"
+glfw = "*"
