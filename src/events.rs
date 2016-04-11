@@ -1,8 +1,9 @@
 use geometry::Point;
 
-type EventHandler = fn (event:Event);
+pub type EventHandler = fn (event:Event);
 
-enum EventType
+#[derive(PartialEq,Eq,Hash)]
+pub enum EventType
 {
   KeyDown,
   KeyUp,
@@ -15,7 +16,7 @@ enum EventType
   PointerMove,
 }
 
-enum Event
+pub enum Event
 {
   KeyDown(Key),
   KeyUp(Key),
@@ -28,8 +29,8 @@ enum Event
   PointerMove(Point),
 }
 
-struct Key
+pub struct Key
 {
-  code: u32,
-  letter: Some(char)
+  pub code: u32,
+  pub letter: Option<char>
 }

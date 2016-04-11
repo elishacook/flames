@@ -1,50 +1,92 @@
-use std::cmp::Eq;
-use events::{EventType, EventHandler};
+use std::collections::HashMap;
+use std::ops::Deref;
+use events::{EventType,EventHandler};
 
-struct Component <T: Controller, M: Eq>
+pub trait View<T>
 {
-  controller: T<M>,
-  view: View<T>,
+  fn render (&self, T) ->  Node;
 }
 
-trait Controller <T: Eq>
-{
-  fn new (model: T) -> Self;
-  fn set_state (model: T);
-  fn get_state () -> T;
-}
-
-type View<T: Controller> = fn <T> (controller: T) -> ViewNode;
-
-struct ViewNode
-{
-  children: Vec<ViewNode>,
-  type: ViewNodeType
-}
-
-enum ViewNodeType
+pub enum Node
 {
   Text(String),
-  Element(ViewElementData),
-  Component(Component,Option<ViewNode>)
+  Element(ElementData)
 }
 
-struct ViewElementData
+pub struct ElementData
 {
-  tags: Vec<String>,
-  handlers: HashMap<EventType, EventHandler>,
+  tags: TagList,
+  children: NodeList,
+  handlers: EventHandlerMap
 }
 
-pub fn component<T, M> (view: View<T>, model: M) where T: Controller <M> -> ViewNode;
+type TagList = Vec<String>;
+type NodeList = Vec<Node>;
+type EventHandlerMap = HashMap<EventType,EventHandler>;
+
+pub struct ElementBuilder {
+  data: ElementData
+}
+
+impl ElementBuilder
 {
-  ViewNode {
-    children: Vec::new(),
-    type: ViewNodeType::Component(
-      Component {
-        controller: T::new(model),
-        view: view,
-      },
-      Option::None
-    )
+  pub fn new (tags: &[&str]) -> Self
+  {
+    ElementBuilder {
+      data: ElementData {
+        tags: tags.iter().map(|x: &&str| x.to_string()).collect::<TagList>(),
+        children: NodeList::new(),
+        handlers: EventHandlerMap::new(),
+      }
+    }
   }
+  
+  pub fn tag (mut self, name: &str) -> Self
+  {
+    self.data.tags.push(name.to_string());
+    self
+  }
+  
+  pub fn add_child(mut self, child: Node) -> Self
+  {
+    self.data.children.push(child);
+    self
+  }
+  
+  pub fn node (self) -> Node
+  {
+    Node::Element(self.data)
+  }
+}
+
+pub fn text (data: &str) -> Node
+{
+  Node::Text(data.to_string())
+}
+
+pub fn element (tags: Vec<&str>) -> ElementBuilder
+{
+  ElementBuilder::new(&tags)
+}
+
+
+/////////////////////////////
+/////////PLAYGROUND//////////
+/////////////////////////////
+
+struct ExampleView;
+
+impl<'a> View<&'a str> for ExampleView
+{
+  fn render(&self, item: &'a str) -> Node
+  {
+    element(vec!["list"]).add_child(text(item)).node()
+  }
+}
+
+fn example ()
+{
+  let foo = "foo";
+  let view = ExampleView;
+  let node = view.render(foo);
 }
