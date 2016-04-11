@@ -2,6 +2,26 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use events::{EventType,EventHandler};
 
+/// Transforms some state object `T` into a `component::Node`
+///
+/// # Example
+/// ```
+/// struct ExampleView;
+/// 
+/// impl<'a> View<&'a str> for ExampleView
+/// {
+///   fn render(&self, item: &'a str) -> Node
+///   {
+///     element(vec!["item"]).add_child(text(item)).node()
+///   }
+/// }
+/// 
+/// fn example ()
+/// {
+///   let foo = "foo";
+///   let view = ExampleView;
+///   let node = vi
+/// ```
 pub trait View<T>
 {
   fn render (&self, T) ->  Node;
@@ -10,7 +30,7 @@ pub trait View<T>
 pub enum Node
 {
   Text(String),
-  Element(ElementData)
+  Element(ElementData),
 }
 
 pub struct ElementData
@@ -67,26 +87,4 @@ pub fn text (data: &str) -> Node
 pub fn element (tags: Vec<&str>) -> ElementBuilder
 {
   ElementBuilder::new(&tags)
-}
-
-
-/////////////////////////////
-/////////PLAYGROUND//////////
-/////////////////////////////
-
-struct ExampleView;
-
-impl<'a> View<&'a str> for ExampleView
-{
-  fn render(&self, item: &'a str) -> Node
-  {
-    element(vec!["list"]).add_child(text(item)).node()
-  }
-}
-
-fn example ()
-{
-  let foo = "foo";
-  let view = ExampleView;
-  let node = view.render(foo);
 }
